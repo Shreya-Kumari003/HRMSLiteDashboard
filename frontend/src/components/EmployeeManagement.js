@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 import { employeeAPI } from '../services/api';
 import PageHeader from './PageHeader';
@@ -22,22 +22,24 @@ function EmployeeManagement() {
     employeeName: ''
   });
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
+ 
       const response = await employeeAPI.getAll();
       setEmployees(response.data);
+ 
     } catch (err) {
       enqueueSnackbar('Failed to fetch employees', { variant: 'error' });
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [enqueueSnackbar]);
+ 
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

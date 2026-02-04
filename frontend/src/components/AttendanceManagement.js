@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
 import { employeeAPI, attendanceAPI } from '../services/api';
 import PageHeader from './PageHeader';
@@ -21,26 +21,29 @@ function AttendanceManagement() {
     status: 'Present'
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+ 
       const [employeesRes, attendanceRes] = await Promise.all([
         employeeAPI.getAll(),
         attendanceAPI.getAll(filters)
       ]);
+ 
       setEmployees(employeesRes.data);
       setAttendance(attendanceRes.data);
+ 
     } catch (err) {
       enqueueSnackbar('Failed to fetch data', { variant: 'error' });
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [filters, enqueueSnackbar]);
+ 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
